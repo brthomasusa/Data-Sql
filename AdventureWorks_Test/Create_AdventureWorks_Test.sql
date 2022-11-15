@@ -112,5 +112,77 @@ GO
 ALTER TABLE [Agents].[ContactType] ADD  CONSTRAINT [DF_ContactType_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
+-- Agents.AgentContact
+CREATE TABLE [Agents].[AgentContact](
+	[AgentID] [int] NOT NULL,
+	[PersonID] [int] NOT NULL,
+	[ContactTypeID] [int] NOT NULL,
+	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_AgentContact_AgentID_PersonID_ContactTypeID] PRIMARY KEY CLUSTERED 
+    (
+        [AgentID] ASC,
+        [PersonID] ASC,
+        [ContactTypeID] ASC
+    ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [Agents].[AgentContact] ADD  CONSTRAINT [DF_AgentContact_rowguid]  DEFAULT (newid()) FOR [rowguid]
+GO
+
+ALTER TABLE [Agents].[AgentContact] ADD  CONSTRAINT [DF_AgentContact_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+GO
+
+ALTER TABLE [Agents].[AgentContact]  WITH CHECK ADD  CONSTRAINT [FK_AgentContact_EconomicAgents_AgentID] FOREIGN KEY([AgentID])
+REFERENCES [Agents].[EconomicAgents] ([AgentID])
+GO
+
+ALTER TABLE [Agents].[AgentContact] CHECK CONSTRAINT [FK_AgentContact_EconomicAgents_AgentID]
+GO
+
+ALTER TABLE [Agents].[AgentContact]  WITH CHECK ADD  CONSTRAINT [FK_AgentContact_ContactType_ContactTypeID] FOREIGN KEY([ContactTypeID])
+REFERENCES [Agents].[ContactType] ([ContactTypeID])
+GO
+
+ALTER TABLE [Agents].[AgentContact] CHECK CONSTRAINT [FK_AgentContact_ContactType_ContactTypeID]
+GO
+
+ALTER TABLE [Agents].[AgentContact]  WITH CHECK ADD  CONSTRAINT [FK_AgentContact_Person_PersonID] FOREIGN KEY([PersonID])
+REFERENCES [Agents].[Person] ([AgentID])
+GO
+
+ALTER TABLE [Agents].[AgentContact] CHECK CONSTRAINT [FK_AgentContact_Person_PersonID]
+GO
+
+-- Agents.EmailAddress
+CREATE TABLE [Agents].[EmailAddress](
+	[AgentID] [int] NOT NULL,
+	[EmailAddressID] [int] IDENTITY(1,1) NOT NULL,
+	[EmailAddress] [nvarchar](50) NULL,
+	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_EmailAddress_AgentID_EmailAddressID] PRIMARY KEY CLUSTERED 
+(
+	[AgentID] ASC,
+	[EmailAddressID] ASC
+) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [Agents].[EmailAddress] ADD  CONSTRAINT [DF_EmailAddress_rowguid]  DEFAULT (newid()) FOR [rowguid]
+GO
+
+ALTER TABLE [Agents].[EmailAddress] ADD  CONSTRAINT [DF_EmailAddress_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+GO
+
+ALTER TABLE [Agents].[EmailAddress]  WITH CHECK ADD  CONSTRAINT [FK_EmailAddress_Agents_AgentID] FOREIGN KEY([AgentID])
+REFERENCES [Agents].[Person] ([AgentID])
+GO
+
+ALTER TABLE [Agents].[EmailAddress] CHECK CONSTRAINT [FK_EmailAddress_Agents_AgentID]
+GO
+
+
 
 
