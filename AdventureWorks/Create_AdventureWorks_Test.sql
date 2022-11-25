@@ -223,6 +223,38 @@ GO
 ALTER TABLE [Person].[BusinessEntity] ADD  CONSTRAINT [DF_BusinessEntity_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
+-- Person.Company
+CREATE TABLE [Person].[Company](
+	[BusinessEntityID] [int] NOT NULL,
+	[CompanyName] [dbo].[Name] NOT NULL,
+	[LegalName] [dbo].[Name] NULL,
+	[EIN] [nchar](10) NOT NULL,
+	[WebsiteUrl] [nvarchar](50) NULL,
+	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_Company_BusinessEntityID] PRIMARY KEY CLUSTERED 
+(
+	[BusinessEntityID] ASC
+) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [Person].[Company] ADD  CONSTRAINT [DF_Company_LegalName]  DEFAULT ('Same as company name') FOR [LegalName]
+GO
+
+ALTER TABLE [Person].[Company] ADD  CONSTRAINT [DF_Company_rowguid]  DEFAULT (newid()) FOR [rowguid]
+GO
+
+ALTER TABLE [Person].[Company] ADD  CONSTRAINT [DF_Company_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+GO
+
+ALTER TABLE [Person].[Company]  WITH CHECK ADD  CONSTRAINT [FK_Company_BusinessEntity_BusinessEntityID] FOREIGN KEY([BusinessEntityID])
+REFERENCES [Person].[BusinessEntity] ([BusinessEntityID])
+GO
+
+ALTER TABLE [Person].[Company] CHECK CONSTRAINT [FK_Company_BusinessEntity_BusinessEntityID]
+GO
+
 -- Person.Address
 CREATE TABLE [Person].[Address](
 	[AddressID] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
@@ -628,7 +660,7 @@ GO
 ALTER TABLE [HumanResources].[EmployeePayHistory] CHECK CONSTRAINT [CK_EmployeePayHistory_PayFrequency]
 GO
 
-ALTER TABLE [HumanResources].[EmployeePayHistory]  WITH CHECK ADD  CONSTRAINT [CK_EmployeePayHistory_Rate] CHECK  (([Rate]>=(7.50) AND [Rate]<=(200.00)))
+ALTER TABLE [HumanResources].[EmployeePayHistory]  WITH CHECK ADD  CONSTRAINT [CK_EmployeePayHistory_Rate] CHECK  (([Rate]>=(6.50) AND [Rate]<=(200.00)))
 GO
 
 ALTER TABLE [HumanResources].[EmployeePayHistory] CHECK CONSTRAINT [CK_EmployeePayHistory_Rate]
