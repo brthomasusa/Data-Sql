@@ -2,11 +2,15 @@ USE [AdventureWorks_Test]
 GO
 
 -- Schemas
-CREATE SCHEMA Agents
+CREATE SCHEMA HumanResources
 GO
-CREATE SCHEMA Events
+CREATE SCHEMA Person
 GO
-CREATE SCHEMA Resources
+CREATE SCHEMA Production
+GO
+CREATE SCHEMA Purchasing
+GO
+CREATE SCHEMA Sales
 GO
 
 -- User-defined types
@@ -28,77 +32,27 @@ GO
 CREATE TYPE [dbo].[Phone] FROM [nvarchar](25) NULL
 GO
 
--- Agents.EconomicAgents
-CREATE TABLE [Agents].[EconomicAgents](
-	[AgentID] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+-- Person.AddressType
+CREATE TABLE [Person].[AddressType](
+	[AddressTypeID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [dbo].[Name] NOT NULL,
 	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_EconomicAgents_AgentID] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_AddressType_AddressTypeID] PRIMARY KEY CLUSTERED 
 (
-	[AgentID] ASC
+	[AddressTypeID] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[EconomicAgents] ADD  CONSTRAINT [DF_EconomicAgents_rowguid]  DEFAULT (newid()) FOR [rowguid]
+ALTER TABLE [Person].[AddressType] ADD  CONSTRAINT [DF_AddressType_rowguid]  DEFAULT (newid()) FOR [rowguid]
 GO
 
-ALTER TABLE [Agents].[EconomicAgents] ADD  CONSTRAINT [DF_EconomicAgents_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [Person].[AddressType] ADD  CONSTRAINT [DF_AddressType_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
--- Agents.Person
-CREATE TABLE [Agents].[Person](
-	[AgentID] [int] NOT NULL,
-	[PersonType] [nchar](2) NOT NULL,
-	[NameStyle] [dbo].[NameStyle] NOT NULL,
-	[Title] [nvarchar](8) NULL,
-	[FirstName] [dbo].[Name] NOT NULL,
-	[MiddleName] [dbo].[Name] NULL,
-	[LastName] [dbo].[Name] NOT NULL,
-	[Suffix] [nvarchar](10) NULL,
-	[EmailPromotion] [int] NOT NULL,
-	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
-	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_Person_AgentID] PRIMARY KEY CLUSTERED 
-(
-	[AgentID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] 
-GO
-
-ALTER TABLE [Agents].[Person] ADD  CONSTRAINT [DF_Person_NameStyle]  DEFAULT ((0)) FOR [NameStyle]
-GO
-
-ALTER TABLE [Agents].[Person] ADD  CONSTRAINT [DF_Person_EmailPromotion]  DEFAULT ((0)) FOR [EmailPromotion]
-GO
-
-ALTER TABLE [Agents].[Person] ADD  CONSTRAINT [DF_Person_rowguid]  DEFAULT (newid()) FOR [rowguid]
-GO
-
-ALTER TABLE [Agents].[Person] ADD  CONSTRAINT [DF_Person_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
-GO
-
-ALTER TABLE [Agents].[Person]  WITH CHECK ADD  CONSTRAINT [FK_Person_EconomicAgents_AgentID] FOREIGN KEY([AgentID])
-REFERENCES [Agents].[EconomicAgents] ([AgentID])
-GO
-
-ALTER TABLE [Agents].[Person] CHECK CONSTRAINT [FK_Person_EconomicAgents_AgentID]
-GO
-
-ALTER TABLE [Agents].[Person]  WITH CHECK ADD  CONSTRAINT [CK_Person_EmailPromotion] CHECK  (([EmailPromotion]>=(0) AND [EmailPromotion]<=(2)))
-GO
-
-ALTER TABLE [Agents].[Person] CHECK CONSTRAINT [CK_Person_EmailPromotion]
-GO
-
-ALTER TABLE [Agents].[Person]  WITH CHECK ADD  CONSTRAINT [CK_Person_PersonType] CHECK  (([PersonType] IS NULL OR (upper([PersonType])='GC' OR upper([PersonType])='SP' OR upper([PersonType])='EM' OR upper([PersonType])='IN' OR upper([PersonType])='VC' OR upper([PersonType])='SC')))
-GO
-
-ALTER TABLE [Agents].[Person] CHECK CONSTRAINT [CK_Person_PersonType]
-GO
-
--- Agents.ContactType
-CREATE TABLE [Agents].[ContactType](
+-- Person.ContactType
+CREATE TABLE [Person].[ContactType](
 	[ContactTypeID] [int] IDENTITY(1,1) NOT NULL,
 	[Name] [dbo].[Name] NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
@@ -109,82 +63,26 @@ CREATE TABLE [Agents].[ContactType](
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[ContactType] ADD  CONSTRAINT [DF_ContactType_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [Person].[ContactType] ADD  CONSTRAINT [DF_ContactType_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
--- Agents.AgentContact
-CREATE TABLE [Agents].[AgentContact](
-	[AgentID] [int] NOT NULL,
-	[PersonID] [int] NOT NULL,
-	[ContactTypeID] [int] NOT NULL,
-	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+-- Person.PhoneNumberType
+CREATE TABLE [Person].[PhoneNumberType](
+	[PhoneNumberTypeID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [dbo].[Name] NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_AgentContact_AgentID_PersonID_ContactTypeID] PRIMARY KEY CLUSTERED 
-    (
-        [AgentID] ASC,
-        [PersonID] ASC,
-        [ContactTypeID] ASC
-    ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-
-ALTER TABLE [Agents].[AgentContact] ADD  CONSTRAINT [DF_AgentContact_rowguid]  DEFAULT (newid()) FOR [rowguid]
-GO
-
-ALTER TABLE [Agents].[AgentContact] ADD  CONSTRAINT [DF_AgentContact_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
-GO
-
-ALTER TABLE [Agents].[AgentContact]  WITH CHECK ADD  CONSTRAINT [FK_AgentContact_EconomicAgents_AgentID] FOREIGN KEY([AgentID])
-REFERENCES [Agents].[EconomicAgents] ([AgentID])
-GO
-
-ALTER TABLE [Agents].[AgentContact] CHECK CONSTRAINT [FK_AgentContact_EconomicAgents_AgentID]
-GO
-
-ALTER TABLE [Agents].[AgentContact]  WITH CHECK ADD  CONSTRAINT [FK_AgentContact_ContactType_ContactTypeID] FOREIGN KEY([ContactTypeID])
-REFERENCES [Agents].[ContactType] ([ContactTypeID])
-GO
-
-ALTER TABLE [Agents].[AgentContact] CHECK CONSTRAINT [FK_AgentContact_ContactType_ContactTypeID]
-GO
-
-ALTER TABLE [Agents].[AgentContact]  WITH CHECK ADD  CONSTRAINT [FK_AgentContact_Person_PersonID] FOREIGN KEY([PersonID])
-REFERENCES [Agents].[Person] ([AgentID])
-GO
-
-ALTER TABLE [Agents].[AgentContact] CHECK CONSTRAINT [FK_AgentContact_Person_PersonID]
-GO
-
--- Agents.EmailAddress
-CREATE TABLE [Agents].[EmailAddress](
-	[AgentID] [int] NOT NULL,
-	[EmailAddressID] [int] IDENTITY(1,1) NOT NULL,
-	[EmailAddress] [nvarchar](50) NULL,
-	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
-	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_EmailAddress_AgentID_EmailAddressID] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_PhoneNumberType_PhoneNumberTypeID] PRIMARY KEY CLUSTERED 
 (
-	[AgentID] ASC,
-	[EmailAddressID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+	[PhoneNumberTypeID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[EmailAddress] ADD  CONSTRAINT [DF_EmailAddress_rowguid]  DEFAULT (newid()) FOR [rowguid]
+ALTER TABLE [Person].[PhoneNumberType] ADD  CONSTRAINT [DF_PhoneNumberType_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
-ALTER TABLE [Agents].[EmailAddress] ADD  CONSTRAINT [DF_EmailAddress_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
-GO
-
-ALTER TABLE [Agents].[EmailAddress]  WITH CHECK ADD  CONSTRAINT [FK_EmailAddress_Agents_AgentID] FOREIGN KEY([AgentID])
-REFERENCES [Agents].[Person] ([AgentID])
-GO
-
-ALTER TABLE [Agents].[EmailAddress] CHECK CONSTRAINT [FK_EmailAddress_Agents_AgentID]
-GO
-
--- Agents.CountryRegion
-CREATE TABLE [Agents].[CountryRegion](
+-- Person.CountryRegion
+CREATE TABLE [Person].[CountryRegion](
 	[CountryRegionCode] [nvarchar](3) NOT NULL,
 	[Name] [dbo].[Name] NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
@@ -195,11 +93,11 @@ CREATE TABLE [Agents].[CountryRegion](
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[CountryRegion] ADD  CONSTRAINT [DF_CountryRegion_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [Person].[CountryRegion] ADD  CONSTRAINT [DF_CountryRegion_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
--- Agents.SalesTerritory
-CREATE TABLE [Agents].[SalesTerritory](
+-- Sales.SalesTerritory
+CREATE TABLE [Sales].[SalesTerritory](
 	[TerritoryID] [int] IDENTITY(1,1) NOT NULL,
 	[Name] [dbo].[Name] NOT NULL,
 	[CountryRegionCode] [nvarchar](3) NOT NULL,
@@ -213,62 +111,61 @@ CREATE TABLE [Agents].[SalesTerritory](
  CONSTRAINT [PK_SalesTerritory_TerritoryID] PRIMARY KEY CLUSTERED 
 (
 	[TerritoryID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_SalesYTD]  DEFAULT ((0.00)) FOR [SalesYTD]
+ALTER TABLE [Sales].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_SalesYTD]  DEFAULT ((0.00)) FOR [SalesYTD]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_SalesLastYear]  DEFAULT ((0.00)) FOR [SalesLastYear]
+ALTER TABLE [Sales].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_SalesLastYear]  DEFAULT ((0.00)) FOR [SalesLastYear]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_CostYTD]  DEFAULT ((0.00)) FOR [CostYTD]
+ALTER TABLE [Sales].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_CostYTD]  DEFAULT ((0.00)) FOR [CostYTD]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_CostLastYear]  DEFAULT ((0.00)) FOR [CostLastYear]
+ALTER TABLE [Sales].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_CostLastYear]  DEFAULT ((0.00)) FOR [CostLastYear]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_rowguid]  DEFAULT (newid()) FOR [rowguid]
+ALTER TABLE [Sales].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_rowguid]  DEFAULT (newid()) FOR [rowguid]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [Sales].[SalesTerritory] ADD  CONSTRAINT [DF_SalesTerritory_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory]  WITH CHECK ADD  CONSTRAINT [FK_SalesTerritory_CountryRegion_CountryRegionCode] FOREIGN KEY([CountryRegionCode])
-REFERENCES [Agents].[CountryRegion] ([CountryRegionCode])
+ALTER TABLE [Sales].[SalesTerritory]  WITH CHECK ADD  CONSTRAINT [FK_SalesTerritory_CountryRegion_CountryRegionCode] FOREIGN KEY([CountryRegionCode])
+REFERENCES [Person].[CountryRegion] ([CountryRegionCode])
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] CHECK CONSTRAINT [FK_SalesTerritory_CountryRegion_CountryRegionCode]
+ALTER TABLE [Sales].[SalesTerritory] CHECK CONSTRAINT [FK_SalesTerritory_CountryRegion_CountryRegionCode]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory]  WITH CHECK ADD  CONSTRAINT [CK_SalesTerritory_CostLastYear] CHECK  (([CostLastYear]>=(0.00)))
+ALTER TABLE [Sales].[SalesTerritory]  WITH CHECK ADD  CONSTRAINT [CK_SalesTerritory_CostLastYear] CHECK  (([CostLastYear]>=(0.00)))
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] CHECK CONSTRAINT [CK_SalesTerritory_CostLastYear]
+ALTER TABLE [Sales].[SalesTerritory] CHECK CONSTRAINT [CK_SalesTerritory_CostLastYear]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory]  WITH CHECK ADD  CONSTRAINT [CK_SalesTerritory_CostYTD] CHECK  (([CostYTD]>=(0.00)))
+ALTER TABLE [Sales].[SalesTerritory]  WITH CHECK ADD  CONSTRAINT [CK_SalesTerritory_CostYTD] CHECK  (([CostYTD]>=(0.00)))
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] CHECK CONSTRAINT [CK_SalesTerritory_CostYTD]
+ALTER TABLE [Sales].[SalesTerritory] CHECK CONSTRAINT [CK_SalesTerritory_CostYTD]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory]  WITH CHECK ADD  CONSTRAINT [CK_SalesTerritory_SalesLastYear] CHECK  (([SalesLastYear]>=(0.00)))
+ALTER TABLE [Sales].[SalesTerritory]  WITH CHECK ADD  CONSTRAINT [CK_SalesTerritory_SalesLastYear] CHECK  (([SalesLastYear]>=(0.00)))
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] CHECK CONSTRAINT [CK_SalesTerritory_SalesLastYear]
+ALTER TABLE [Sales].[SalesTerritory] CHECK CONSTRAINT [CK_SalesTerritory_SalesLastYear]
 GO
 
-ALTER TABLE [Agents].[SalesTerritory]  WITH CHECK ADD  CONSTRAINT [CK_SalesTerritory_SalesYTD] CHECK  (([SalesYTD]>=(0.00)))
+ALTER TABLE [Sales].[SalesTerritory]  WITH CHECK ADD  CONSTRAINT [CK_SalesTerritory_SalesYTD] CHECK  (([SalesYTD]>=(0.00)))
 GO
 
-ALTER TABLE [Agents].[SalesTerritory] CHECK CONSTRAINT [CK_SalesTerritory_SalesYTD]
+ALTER TABLE [Sales].[SalesTerritory] CHECK CONSTRAINT [CK_SalesTerritory_SalesYTD]
 GO
 
---Agents.StateProvince
-
-CREATE TABLE [Agents].[StateProvince](
+-- Person.StateProvince
+CREATE TABLE [Person].[StateProvince](
 	[StateProvinceID] [int] IDENTITY(1,1) NOT NULL,
 	[StateProvinceCode] [nchar](3) NOT NULL,
 	[CountryRegionCode] [nvarchar](3) NOT NULL,
@@ -280,55 +177,53 @@ CREATE TABLE [Agents].[StateProvince](
  CONSTRAINT [PK_StateProvince_StateProvinceID] PRIMARY KEY CLUSTERED 
 (
 	[StateProvinceID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[StateProvince] ADD  CONSTRAINT [DF_StateProvince_IsOnlyStateProvinceFlag]  DEFAULT ((1)) FOR [IsOnlyStateProvinceFlag]
+ALTER TABLE [Person].[StateProvince] ADD  CONSTRAINT [DF_StateProvince_IsOnlyStateProvinceFlag]  DEFAULT ((1)) FOR [IsOnlyStateProvinceFlag]
 GO
 
-ALTER TABLE [Agents].[StateProvince] ADD  CONSTRAINT [DF_StateProvince_rowguid]  DEFAULT (newid()) FOR [rowguid]
+ALTER TABLE [Person].[StateProvince] ADD  CONSTRAINT [DF_StateProvince_rowguid]  DEFAULT (newid()) FOR [rowguid]
 GO
 
-ALTER TABLE [Agents].[StateProvince] ADD  CONSTRAINT [DF_StateProvince_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [Person].[StateProvince] ADD  CONSTRAINT [DF_StateProvince_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
-ALTER TABLE [Agents].[StateProvince]  WITH CHECK ADD  CONSTRAINT [FK_StateProvince_CountryRegion_CountryRegionCode] FOREIGN KEY([CountryRegionCode])
-REFERENCES [Agents].[CountryRegion] ([CountryRegionCode])
+ALTER TABLE [Person].[StateProvince]  WITH CHECK ADD  CONSTRAINT [FK_StateProvince_CountryRegion_CountryRegionCode] FOREIGN KEY([CountryRegionCode])
+REFERENCES [Person].[CountryRegion] ([CountryRegionCode])
 GO
 
-ALTER TABLE [Agents].[StateProvince] CHECK CONSTRAINT [FK_StateProvince_CountryRegion_CountryRegionCode]
+ALTER TABLE [Person].[StateProvince] CHECK CONSTRAINT [FK_StateProvince_CountryRegion_CountryRegionCode]
 GO
 
-ALTER TABLE [Agents].[StateProvince]  WITH CHECK ADD  CONSTRAINT [FK_StateProvince_SalesTerritory_TerritoryID] FOREIGN KEY([TerritoryID])
-REFERENCES [Agents].[SalesTerritory] ([TerritoryID])
+ALTER TABLE [Person].[StateProvince]  WITH CHECK ADD  CONSTRAINT [FK_StateProvince_SalesTerritory_TerritoryID] FOREIGN KEY([TerritoryID])
+REFERENCES [Sales].[SalesTerritory] ([TerritoryID])
 GO
 
-ALTER TABLE [Agents].[StateProvince] CHECK CONSTRAINT [FK_StateProvince_SalesTerritory_TerritoryID]
+ALTER TABLE [Person].[StateProvince] CHECK CONSTRAINT [FK_StateProvince_SalesTerritory_TerritoryID]
 GO
 
--- Agents.AddressType
-CREATE TABLE [Agents].[AddressType](
-	[AddressTypeID] [int] IDENTITY(1,1) NOT NULL,
-	[Name] [dbo].[Name] NOT NULL,
+-- Person.BusinessEntity
+CREATE TABLE [Person].[BusinessEntity](
+	[BusinessEntityID] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_AddressType_AddressTypeID] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_BusinessEntity_BusinessEntityID] PRIMARY KEY CLUSTERED 
 (
-	[AddressTypeID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+	[BusinessEntityID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[AddressType] ADD  CONSTRAINT [DF_AddressType_rowguid]  DEFAULT (newid()) FOR [rowguid]
+ALTER TABLE [Person].[BusinessEntity] ADD  CONSTRAINT [DF_BusinessEntity_rowguid]  DEFAULT (newid()) FOR [rowguid]
 GO
 
-ALTER TABLE [Agents].[AddressType] ADD  CONSTRAINT [DF_AddressType_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [Person].[BusinessEntity] ADD  CONSTRAINT [DF_BusinessEntity_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
--- Agents.Address
-
-CREATE TABLE [Agents].[Address](
+-- Person.Address
+CREATE TABLE [Person].[Address](
 	[AddressID] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[AddressLine1] [nvarchar](60) NOT NULL,
 	[AddressLine2] [nvarchar](60) NULL,
@@ -341,68 +236,249 @@ CREATE TABLE [Agents].[Address](
  CONSTRAINT [PK_Address_AddressID] PRIMARY KEY CLUSTERED 
 (
 	[AddressID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[Address] ADD  CONSTRAINT [DF_Address_rowguid]  DEFAULT (newid()) FOR [rowguid]
+ALTER TABLE [Person].[Address] ADD  CONSTRAINT [DF_Address_rowguid]  DEFAULT (newid()) FOR [rowguid]
 GO
 
-ALTER TABLE [Agents].[Address] ADD  CONSTRAINT [DF_Address_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [Person].[Address] ADD  CONSTRAINT [DF_Address_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
-ALTER TABLE [Agents].[Address]  WITH CHECK ADD  CONSTRAINT [FK_Address_StateProvince_StateProvinceID] FOREIGN KEY([StateProvinceID])
-REFERENCES [Agents].[StateProvince] ([StateProvinceID])
+ALTER TABLE [Person].[Address]  WITH CHECK ADD  CONSTRAINT [FK_Address_StateProvince_StateProvinceID] FOREIGN KEY([StateProvinceID])
+REFERENCES [Person].[StateProvince] ([StateProvinceID])
 GO
 
-ALTER TABLE [Agents].[Address] CHECK CONSTRAINT [FK_Address_StateProvince_StateProvinceID]
+ALTER TABLE [Person].[Address] CHECK CONSTRAINT [FK_Address_StateProvince_StateProvinceID]
 GO
 
--- Agents.EconomicAgentsAddress
-CREATE TABLE [Agents].[EconomicAgentsAddress](
-	[AgentID] [int] NOT NULL,
+-- Person.Person
+CREATE TABLE [Person].[Person](
+	[BusinessEntityID] [int] NOT NULL,
+	[PersonType] [nchar](2) NOT NULL,
+	[NameStyle] [dbo].[NameStyle] NOT NULL,
+	[Title] [nvarchar](8) NULL,
+	[FirstName] [dbo].[Name] NOT NULL,
+	[MiddleName] [dbo].[Name] NULL,
+	[LastName] [dbo].[Name] NOT NULL,
+	[Suffix] [nvarchar](10) NULL,
+	[EmailPromotion] [int] NOT NULL,
+	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_Person_BusinessEntityID] PRIMARY KEY CLUSTERED 
+(
+	[BusinessEntityID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [Person].[Person] ADD  CONSTRAINT [DF_Person_NameStyle]  DEFAULT ((0)) FOR [NameStyle]
+GO
+
+ALTER TABLE [Person].[Person] ADD  CONSTRAINT [DF_Person_EmailPromotion]  DEFAULT ((0)) FOR [EmailPromotion]
+GO
+
+ALTER TABLE [Person].[Person] ADD  CONSTRAINT [DF_Person_rowguid]  DEFAULT (newid()) FOR [rowguid]
+GO
+
+ALTER TABLE [Person].[Person] ADD  CONSTRAINT [DF_Person_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+GO
+
+ALTER TABLE [Person].[Person]  WITH CHECK ADD  CONSTRAINT [FK_Person_BusinessEntity_BusinessEntityID] FOREIGN KEY([BusinessEntityID])
+REFERENCES [Person].[BusinessEntity] ([BusinessEntityID])
+GO
+
+ALTER TABLE [Person].[Person] CHECK CONSTRAINT [FK_Person_BusinessEntity_BusinessEntityID]
+GO
+
+ALTER TABLE [Person].[Person]  WITH CHECK ADD  CONSTRAINT [CK_Person_EmailPromotion] CHECK  (([EmailPromotion]>=(0) AND [EmailPromotion]<=(2)))
+GO
+
+ALTER TABLE [Person].[Person] CHECK CONSTRAINT [CK_Person_EmailPromotion]
+GO
+
+ALTER TABLE [Person].[Person]  WITH CHECK ADD  CONSTRAINT [CK_Person_PersonType] CHECK  (([PersonType] IS NULL OR (upper([PersonType])='GC' OR upper([PersonType])='SP' OR upper([PersonType])='EM' OR upper([PersonType])='IN' OR upper([PersonType])='VC' OR upper([PersonType])='SC')))
+GO
+
+ALTER TABLE [Person].[Person] CHECK CONSTRAINT [CK_Person_PersonType]
+GO
+
+-- Person.BusinessEntityAddress
+CREATE TABLE [Person].[BusinessEntityAddress](
+	[BusinessEntityID] [int] NOT NULL,
 	[AddressID] [int] NOT NULL,
 	[AddressTypeID] [int] NOT NULL,
 	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_EconomicAgentsAddress_AgentID_AddressID_AddressTypeID] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_BusinessEntityAddress_BusinessEntityID_AddressID_AddressTypeID] PRIMARY KEY CLUSTERED 
 (
-	[AgentID] ASC,
+	[BusinessEntityID] ASC,
 	[AddressID] ASC,
 	[AddressTypeID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[EconomicAgentsAddress] ADD  CONSTRAINT [DF_EconomicAgentsAddress_rowguid]  DEFAULT (newid()) FOR [rowguid]
+ALTER TABLE [Person].[BusinessEntityAddress] ADD  CONSTRAINT [DF_BusinessEntityAddress_rowguid]  DEFAULT (newid()) FOR [rowguid]
 GO
 
-ALTER TABLE [Agents].[EconomicAgentsAddress] ADD  CONSTRAINT [DF_EconomicAgentsAddress_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [Person].[BusinessEntityAddress] ADD  CONSTRAINT [DF_BusinessEntityAddress_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
-ALTER TABLE [Agents].[EconomicAgentsAddress]  WITH CHECK ADD  CONSTRAINT [FK_EconomicAgentsAddress_Address_AddressID] FOREIGN KEY([AddressID])
-REFERENCES [Agents].[Address] ([AddressID])
+ALTER TABLE [Person].[BusinessEntityAddress]  WITH CHECK ADD  CONSTRAINT [FK_BusinessEntityAddress_Address_AddressID] FOREIGN KEY([AddressID])
+REFERENCES [Person].[Address] ([AddressID])
 GO
 
-ALTER TABLE [Agents].[EconomicAgentsAddress] CHECK CONSTRAINT [FK_EconomicAgentsAddress_Address_AddressID]
+ALTER TABLE [Person].[BusinessEntityAddress] CHECK CONSTRAINT [FK_BusinessEntityAddress_Address_AddressID]
 GO
 
-ALTER TABLE [Agents].[EconomicAgentsAddress]  WITH CHECK ADD  CONSTRAINT [FK_EconomicAgentsAddres_AddressType_AddressTypeID] FOREIGN KEY([AddressTypeID])
-REFERENCES [Agents].[AddressType] ([AddressTypeID])
+ALTER TABLE [Person].[BusinessEntityAddress]  WITH CHECK ADD  CONSTRAINT [FK_BusinessEntityAddress_AddressType_AddressTypeID] FOREIGN KEY([AddressTypeID])
+REFERENCES [Person].[AddressType] ([AddressTypeID])
 GO
 
-ALTER TABLE [Agents].[EconomicAgentsAddress] CHECK CONSTRAINT [FK_EconomicAgentsAddres_AddressType_AddressTypeID]
+ALTER TABLE [Person].[BusinessEntityAddress] CHECK CONSTRAINT [FK_BusinessEntityAddress_AddressType_AddressTypeID]
 GO
 
-ALTER TABLE [Agents].[EconomicAgentsAddress]  WITH CHECK ADD  CONSTRAINT [FK_EconomicAgentsAddress_EconomicAgent_AgentID] FOREIGN KEY([AgentID])
-REFERENCES [Agents].[EconomicAgents] ([AgentID])
+ALTER TABLE [Person].[BusinessEntityAddress]  WITH CHECK ADD  CONSTRAINT [FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID] FOREIGN KEY([BusinessEntityID])
+REFERENCES [Person].[BusinessEntity] ([BusinessEntityID])
 GO
 
-ALTER TABLE [Agents].[EconomicAgentsAddress] CHECK CONSTRAINT [FK_EconomicAgentsAddress_EconomicAgent_AgentID]
+ALTER TABLE [Person].[BusinessEntityAddress] CHECK CONSTRAINT [FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID]
 GO
 
--- Agents.Shift
-CREATE TABLE [Agents].[Shift](
+-- Person.BusinessEntityContact
+CREATE TABLE [Person].[BusinessEntityContact](
+	[BusinessEntityID] [int] NOT NULL,
+	[PersonID] [int] NOT NULL,
+	[ContactTypeID] [int] NOT NULL,
+	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_BusinessEntityContact_BusinessEntityID_PersonID_ContactTypeID] PRIMARY KEY CLUSTERED 
+(
+	[BusinessEntityID] ASC,
+	[PersonID] ASC,
+	[ContactTypeID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [Person].[BusinessEntityContact] ADD  CONSTRAINT [DF_BusinessEntityContact_rowguid]  DEFAULT (newid()) FOR [rowguid]
+GO
+
+ALTER TABLE [Person].[BusinessEntityContact] ADD  CONSTRAINT [DF_BusinessEntityContact_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+GO
+
+ALTER TABLE [Person].[BusinessEntityContact]  WITH CHECK ADD  CONSTRAINT [FK_BusinessEntityContact_BusinessEntity_BusinessEntityID] FOREIGN KEY([BusinessEntityID])
+REFERENCES [Person].[BusinessEntity] ([BusinessEntityID])
+GO
+
+ALTER TABLE [Person].[BusinessEntityContact] CHECK CONSTRAINT [FK_BusinessEntityContact_BusinessEntity_BusinessEntityID]
+GO
+
+ALTER TABLE [Person].[BusinessEntityContact]  WITH CHECK ADD  CONSTRAINT [FK_BusinessEntityContact_ContactType_ContactTypeID] FOREIGN KEY([ContactTypeID])
+REFERENCES [Person].[ContactType] ([ContactTypeID])
+GO
+
+ALTER TABLE [Person].[BusinessEntityContact] CHECK CONSTRAINT [FK_BusinessEntityContact_ContactType_ContactTypeID]
+GO
+
+ALTER TABLE [Person].[BusinessEntityContact]  WITH CHECK ADD  CONSTRAINT [FK_BusinessEntityContact_Person_PersonID] FOREIGN KEY([PersonID])
+REFERENCES [Person].[Person] ([BusinessEntityID])
+GO
+
+ALTER TABLE [Person].[BusinessEntityContact] CHECK CONSTRAINT [FK_BusinessEntityContact_Person_PersonID]
+GO
+
+-- Person.EmailAddress
+CREATE TABLE [Person].[EmailAddress](
+	[BusinessEntityID] [int] NOT NULL,
+	[EmailAddressID] [int] IDENTITY(1,1) NOT NULL,
+	[EmailAddress] [nvarchar](50) NULL,
+	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_EmailAddress_BusinessEntityID_EmailAddressID] PRIMARY KEY CLUSTERED 
+(
+	[BusinessEntityID] ASC,
+	[EmailAddressID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [Person].[EmailAddress] ADD  CONSTRAINT [DF_EmailAddress_rowguid]  DEFAULT (newid()) FOR [rowguid]
+GO
+
+ALTER TABLE [Person].[EmailAddress] ADD  CONSTRAINT [DF_EmailAddress_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+GO
+
+ALTER TABLE [Person].[EmailAddress]  WITH CHECK ADD  CONSTRAINT [FK_EmailAddress_Person_BusinessEntityID] FOREIGN KEY([BusinessEntityID])
+REFERENCES [Person].[Person] ([BusinessEntityID])
+GO
+
+ALTER TABLE [Person].[EmailAddress] CHECK CONSTRAINT [FK_EmailAddress_Person_BusinessEntityID]
+GO
+
+-- Person.Password
+CREATE TABLE [Person].[Password](
+	[BusinessEntityID] [int] NOT NULL,
+	[PasswordHash] [varchar](128) NOT NULL,
+	[PasswordSalt] [varchar](10) NOT NULL,
+	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_Password_BusinessEntityID] PRIMARY KEY CLUSTERED 
+(
+	[BusinessEntityID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [Person].[Password] ADD  CONSTRAINT [DF_Password_rowguid]  DEFAULT (newid()) FOR [rowguid]
+GO
+
+ALTER TABLE [Person].[Password] ADD  CONSTRAINT [DF_Password_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+GO
+
+ALTER TABLE [Person].[Password]  WITH CHECK ADD  CONSTRAINT [FK_Password_Person_BusinessEntityID] FOREIGN KEY([BusinessEntityID])
+REFERENCES [Person].[Person] ([BusinessEntityID])
+GO
+
+ALTER TABLE [Person].[Password] CHECK CONSTRAINT [FK_Password_Person_BusinessEntityID]
+GO
+
+-- Person.PersonPhone
+CREATE TABLE [Person].[PersonPhone](
+	[BusinessEntityID] [int] NOT NULL,
+	[PhoneNumber] [dbo].[Phone] NOT NULL,
+	[PhoneNumberTypeID] [int] NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_PersonPhone_BusinessEntityID_PhoneNumber_PhoneNumberTypeID] PRIMARY KEY CLUSTERED 
+(
+	[BusinessEntityID] ASC,
+	[PhoneNumber] ASC,
+	[PhoneNumberTypeID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [Person].[PersonPhone] ADD  CONSTRAINT [DF_PersonPhone_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+GO
+
+ALTER TABLE [Person].[PersonPhone]  WITH CHECK ADD  CONSTRAINT [FK_PersonPhone_Person_BusinessEntityID] FOREIGN KEY([BusinessEntityID])
+REFERENCES [Person].[Person] ([BusinessEntityID])
+GO
+
+ALTER TABLE [Person].[PersonPhone] CHECK CONSTRAINT [FK_PersonPhone_Person_BusinessEntityID]
+GO
+
+ALTER TABLE [Person].[PersonPhone]  WITH CHECK ADD  CONSTRAINT [FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID] FOREIGN KEY([PhoneNumberTypeID])
+REFERENCES [Person].[PhoneNumberType] ([PhoneNumberTypeID])
+GO
+
+ALTER TABLE [Person].[PersonPhone] CHECK CONSTRAINT [FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID]
+GO
+
+-- HumanResources.Shift
+CREATE TABLE [HumanResources].[Shift](
 	[ShiftID] [tinyint] IDENTITY(1,1) NOT NULL,
 	[Name] [dbo].[Name] NOT NULL,
 	[StartTime] [time](7) NOT NULL,
@@ -411,15 +487,15 @@ CREATE TABLE [Agents].[Shift](
  CONSTRAINT [PK_Shift_ShiftID] PRIMARY KEY CLUSTERED 
 (
 	[ShiftID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[Shift] ADD  CONSTRAINT [DF_Shift_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [HumanResources].[Shift] ADD  CONSTRAINT [DF_Shift_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
--- Agents.Department
-CREATE TABLE [Agents].[Department](
+-- HumanResources.Department
+CREATE TABLE [HumanResources].[Department](
 	[DepartmentID] [smallint] IDENTITY(1,1) NOT NULL,
 	[Name] [dbo].[Name] NOT NULL,
 	[GroupName] [dbo].[Name] NOT NULL,
@@ -427,17 +503,16 @@ CREATE TABLE [Agents].[Department](
  CONSTRAINT [PK_Department_DepartmentID] PRIMARY KEY CLUSTERED 
 (
 	[DepartmentID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[Department] ADD  CONSTRAINT [DF_Department_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [HumanResources].[Department] ADD  CONSTRAINT [DF_Department_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
--- Agents.Employee
-
-CREATE TABLE [Agents].[Employee](
-	[AgentID] [int] NOT NULL,
+-- HumanResources.Employee
+CREATE TABLE [HumanResources].[Employee](
+	[BusinessEntityID] [int] NOT NULL,
 	[NationalIDNumber] [nvarchar](15) NOT NULL,
 	[LoginID] [nvarchar](256) NOT NULL,
 	[OrganizationNode] [hierarchyid] NULL,
@@ -453,254 +528,155 @@ CREATE TABLE [Agents].[Employee](
 	[CurrentFlag] [dbo].[Flag] NOT NULL,
 	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_Employee_AgentID] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_Employee_BusinessEntityID] PRIMARY KEY CLUSTERED 
 (
-	[AgentID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+	[BusinessEntityID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[Employee] ADD  CONSTRAINT [DF_Employee_SalariedFlag]  DEFAULT ((1)) FOR [SalariedFlag]
+ALTER TABLE [HumanResources].[Employee] ADD  CONSTRAINT [DF_Employee_SalariedFlag]  DEFAULT ((1)) FOR [SalariedFlag]
 GO
 
-ALTER TABLE [Agents].[Employee] ADD  CONSTRAINT [DF_Employee_VacationHours]  DEFAULT ((0)) FOR [VacationHours]
+ALTER TABLE [HumanResources].[Employee] ADD  CONSTRAINT [DF_Employee_VacationHours]  DEFAULT ((0)) FOR [VacationHours]
 GO
 
-ALTER TABLE [Agents].[Employee] ADD  CONSTRAINT [DF_Employee_SickLeaveHours]  DEFAULT ((0)) FOR [SickLeaveHours]
+ALTER TABLE [HumanResources].[Employee] ADD  CONSTRAINT [DF_Employee_SickLeaveHours]  DEFAULT ((0)) FOR [SickLeaveHours]
 GO
 
-ALTER TABLE [Agents].[Employee] ADD  CONSTRAINT [DF_Employee_CurrentFlag]  DEFAULT ((1)) FOR [CurrentFlag]
+ALTER TABLE [HumanResources].[Employee] ADD  CONSTRAINT [DF_Employee_CurrentFlag]  DEFAULT ((1)) FOR [CurrentFlag]
 GO
 
-ALTER TABLE [Agents].[Employee] ADD  CONSTRAINT [DF_Employee_rowguid]  DEFAULT (newid()) FOR [rowguid]
+ALTER TABLE [HumanResources].[Employee] ADD  CONSTRAINT [DF_Employee_rowguid]  DEFAULT (newid()) FOR [rowguid]
 GO
 
-ALTER TABLE [Agents].[Employee] ADD  CONSTRAINT [DF_Employee_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [HumanResources].[Employee] ADD  CONSTRAINT [DF_Employee_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
-ALTER TABLE [Agents].[Employee]  WITH CHECK ADD  CONSTRAINT [FK_Employee_Person_AgentID] FOREIGN KEY([AgentID])
-REFERENCES [Agents].[Person] ([AgentID])
+ALTER TABLE [HumanResources].[Employee]  WITH CHECK ADD  CONSTRAINT [FK_Employee_Person_BusinessEntityID] FOREIGN KEY([BusinessEntityID])
+REFERENCES [Person].[Person] ([BusinessEntityID])
 GO
 
-ALTER TABLE [Agents].[Employee] CHECK CONSTRAINT [FK_Employee_Person_AgentID]
+ALTER TABLE [HumanResources].[Employee] CHECK CONSTRAINT [FK_Employee_Person_BusinessEntityID]
 GO
 
-ALTER TABLE [Agents].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_BirthDate] CHECK  (([BirthDate]>='1930-01-01' AND [BirthDate]<=dateadd(year,(-18),getdate())))
+ALTER TABLE [HumanResources].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_BirthDate] CHECK  (([BirthDate]>='1930-01-01' AND [BirthDate]<=dateadd(year,(-18),getdate())))
 GO
 
-ALTER TABLE [Agents].[Employee] CHECK CONSTRAINT [CK_Employee_BirthDate]
+ALTER TABLE [HumanResources].[Employee] CHECK CONSTRAINT [CK_Employee_BirthDate]
 GO
 
-ALTER TABLE [Agents].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_Gender] CHECK  ((upper([Gender])='F' OR upper([Gender])='M'))
+ALTER TABLE [HumanResources].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_Gender] CHECK  ((upper([Gender])='F' OR upper([Gender])='M'))
 GO
 
-ALTER TABLE [Agents].[Employee] CHECK CONSTRAINT [CK_Employee_Gender]
+ALTER TABLE [HumanResources].[Employee] CHECK CONSTRAINT [CK_Employee_Gender]
 GO
 
-ALTER TABLE [Agents].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_HireDate] CHECK  (([HireDate]>='1996-07-01' AND [HireDate]<=dateadd(day,(1),getdate())))
+ALTER TABLE [HumanResources].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_HireDate] CHECK  (([HireDate]>='1996-07-01' AND [HireDate]<=dateadd(day,(1),getdate())))
 GO
 
-ALTER TABLE [Agents].[Employee] CHECK CONSTRAINT [CK_Employee_HireDate]
+ALTER TABLE [HumanResources].[Employee] CHECK CONSTRAINT [CK_Employee_HireDate]
 GO
 
-ALTER TABLE [Agents].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_MaritalStatus] CHECK  ((upper([MaritalStatus])='S' OR upper([MaritalStatus])='M'))
+ALTER TABLE [HumanResources].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_MaritalStatus] CHECK  ((upper([MaritalStatus])='S' OR upper([MaritalStatus])='M'))
 GO
 
-ALTER TABLE [Agents].[Employee] CHECK CONSTRAINT [CK_Employee_MaritalStatus]
+ALTER TABLE [HumanResources].[Employee] CHECK CONSTRAINT [CK_Employee_MaritalStatus]
 GO
 
-ALTER TABLE [Agents].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_SickLeaveHours] CHECK  (([SickLeaveHours]>=(0) AND [SickLeaveHours]<=(120)))
+ALTER TABLE [HumanResources].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_SickLeaveHours] CHECK  (([SickLeaveHours]>=(0) AND [SickLeaveHours]<=(120)))
 GO
 
-ALTER TABLE [Agents].[Employee] CHECK CONSTRAINT [CK_Employee_SickLeaveHours]
+ALTER TABLE [HumanResources].[Employee] CHECK CONSTRAINT [CK_Employee_SickLeaveHours]
 GO
 
-ALTER TABLE [Agents].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_VacationHours] CHECK  (([VacationHours]>=(-40) AND [VacationHours]<=(240)))
+ALTER TABLE [HumanResources].[Employee]  WITH CHECK ADD  CONSTRAINT [CK_Employee_VacationHours] CHECK  (([VacationHours]>=(-40) AND [VacationHours]<=(240)))
 GO
 
-ALTER TABLE [Agents].[Employee] CHECK CONSTRAINT [CK_Employee_VacationHours]
+ALTER TABLE [HumanResources].[Employee] CHECK CONSTRAINT [CK_Employee_VacationHours]
 GO
 
--- Agents.EmployeePayHistory
-
-CREATE TABLE [Agents].[EmployeePayHistory](
-	[AgentID] [int] NOT NULL,
+-- HumanResources.EmployeePayHistory
+CREATE TABLE [HumanResources].[EmployeePayHistory](
+	[BusinessEntityID] [int] NOT NULL,
 	[RateChangeDate] [datetime] NOT NULL,
 	[Rate] [money] NOT NULL,
 	[PayFrequency] [tinyint] NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_EmployeePayHistory_AgentID_RateChangeDate] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_EmployeePayHistory_BusinessEntityID_RateChangeDate] PRIMARY KEY CLUSTERED 
 (
-	[AgentID] ASC,
+	[BusinessEntityID] ASC,
 	[RateChangeDate] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[EmployeePayHistory] ADD  CONSTRAINT [DF_EmployeePayHistory_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [HumanResources].[EmployeePayHistory] ADD  CONSTRAINT [DF_EmployeePayHistory_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
-ALTER TABLE [Agents].[EmployeePayHistory]  WITH CHECK ADD  CONSTRAINT [FK_EmployeePayHistory_Employee_AgentID] FOREIGN KEY([AgentID])
-REFERENCES [Agents].[Employee] ([AgentID])
+ALTER TABLE [HumanResources].[EmployeePayHistory]  WITH CHECK ADD  CONSTRAINT [FK_EmployeePayHistory_Employee_BusinessEntityID] FOREIGN KEY([BusinessEntityID])
+REFERENCES [HumanResources].[Employee] ([BusinessEntityID])
 GO
 
-ALTER TABLE [Agents].[EmployeePayHistory] CHECK CONSTRAINT [FK_EmployeePayHistory_Employee_AgentID]
+ALTER TABLE [HumanResources].[EmployeePayHistory] CHECK CONSTRAINT [FK_EmployeePayHistory_Employee_BusinessEntityID]
 GO
 
-ALTER TABLE [Agents].[EmployeePayHistory]  WITH CHECK ADD  CONSTRAINT [CK_EmployeePayHistory_PayFrequency] CHECK  (([PayFrequency]=(2) OR [PayFrequency]=(1)))
+ALTER TABLE [HumanResources].[EmployeePayHistory]  WITH CHECK ADD  CONSTRAINT [CK_EmployeePayHistory_PayFrequency] CHECK  (([PayFrequency]=(2) OR [PayFrequency]=(1)))
 GO
 
-ALTER TABLE [Agents].[EmployeePayHistory] CHECK CONSTRAINT [CK_EmployeePayHistory_PayFrequency]
+ALTER TABLE [HumanResources].[EmployeePayHistory] CHECK CONSTRAINT [CK_EmployeePayHistory_PayFrequency]
 GO
 
-ALTER TABLE [Agents].[EmployeePayHistory]  WITH CHECK ADD  CONSTRAINT [CK_EmployeePayHistory_Rate] CHECK  (([Rate]>=(6.50) AND [Rate]<=(200.00)))
+ALTER TABLE [HumanResources].[EmployeePayHistory]  WITH CHECK ADD  CONSTRAINT [CK_EmployeePayHistory_Rate] CHECK  (([Rate]>=(7.50) AND [Rate]<=(200.00)))
 GO
 
-ALTER TABLE [Agents].[EmployeePayHistory] CHECK CONSTRAINT [CK_EmployeePayHistory_Rate]
+ALTER TABLE [HumanResources].[EmployeePayHistory] CHECK CONSTRAINT [CK_EmployeePayHistory_Rate]
 GO
 
--- Agents.EmployeeDepartmentHistory
-
-CREATE TABLE [Agents].[EmployeeDepartmentHistory](
-	[AgentID] [int] NOT NULL,
+-- HumanResources.EmployeeDepartmentHistory
+CREATE TABLE [HumanResources].[EmployeeDepartmentHistory](
+	[BusinessEntityID] [int] NOT NULL,
 	[DepartmentID] [smallint] NOT NULL,
 	[ShiftID] [tinyint] NOT NULL,
 	[StartDate] [date] NOT NULL,
 	[EndDate] [date] NULL,
 	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_EmployeeDepartmentHistory_AgentID_StartDate_DepartmentID] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_EmployeeDepartmentHistory_BusinessEntityID_StartDate_DepartmentID] PRIMARY KEY CLUSTERED 
 (
-	[AgentID] ASC,
+	[BusinessEntityID] ASC,
 	[StartDate] ASC,
 	[DepartmentID] ASC,
 	[ShiftID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-
-ALTER TABLE [Agents].[EmployeeDepartmentHistory] ADD  CONSTRAINT [DF_EmployeeDepartmentHistory_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
-GO
-
-ALTER TABLE [Agents].[EmployeeDepartmentHistory]  WITH CHECK ADD  CONSTRAINT [FK_EmployeeDepartmentHistory_Department_DepartmentID] FOREIGN KEY([DepartmentID])
-REFERENCES [Agents].[Department] ([DepartmentID])
-GO
-
-ALTER TABLE [Agents].[EmployeeDepartmentHistory] CHECK CONSTRAINT [FK_EmployeeDepartmentHistory_Department_DepartmentID]
-GO
-
-ALTER TABLE [Agents].[EmployeeDepartmentHistory]  WITH CHECK ADD  CONSTRAINT [FK_EmployeeDepartmentHistory_Employee_AgentID] FOREIGN KEY([AgentID])
-REFERENCES [Agents].[Employee] ([AgentID])
-GO
-
-ALTER TABLE [Agents].[EmployeeDepartmentHistory] CHECK CONSTRAINT [FK_EmployeeDepartmentHistory_Employee_AgentID]
-GO
-
-ALTER TABLE [Agents].[EmployeeDepartmentHistory]  WITH CHECK ADD  CONSTRAINT [FK_EmployeeDepartmentHistory_Shift_ShiftID] FOREIGN KEY([ShiftID])
-REFERENCES [Agents].[Shift] ([ShiftID])
-GO
-
-ALTER TABLE [Agents].[EmployeeDepartmentHistory] CHECK CONSTRAINT [FK_EmployeeDepartmentHistory_Shift_ShiftID]
-GO
-
-ALTER TABLE [Agents].[EmployeeDepartmentHistory]  WITH CHECK ADD  CONSTRAINT [CK_EmployeeDepartmentHistory_EndDate] CHECK  (([EndDate]>=[StartDate] OR [EndDate] IS NULL))
-GO
-
-ALTER TABLE [Agents].[EmployeeDepartmentHistory] CHECK CONSTRAINT [CK_EmployeeDepartmentHistory_EndDate]
-GO
-
--- Agents.Password
-
-CREATE TABLE [Agents].[Password](
-	[AgentID] [int] NOT NULL,
-	[PasswordHash] [varchar](128) NOT NULL,
-	[PasswordSalt] [varchar](10) NOT NULL,
-	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
-	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_Password_AgentID] PRIMARY KEY CLUSTERED 
-(
-	[AgentID] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [Agents].[Password] ADD  CONSTRAINT [DF_Password_rowguid]  DEFAULT (newid()) FOR [rowguid]
+ALTER TABLE [HumanResources].[EmployeeDepartmentHistory] ADD  CONSTRAINT [DF_EmployeeDepartmentHistory_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
 GO
 
-ALTER TABLE [Agents].[Password] ADD  CONSTRAINT [DF_Password_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [HumanResources].[EmployeeDepartmentHistory]  WITH CHECK ADD  CONSTRAINT [FK_EmployeeDepartmentHistory_Department_DepartmentID] FOREIGN KEY([DepartmentID])
+REFERENCES [HumanResources].[Department] ([DepartmentID])
 GO
 
-ALTER TABLE [Agents].[Password]  WITH CHECK ADD  CONSTRAINT [FK_Password_Person_AgentID] FOREIGN KEY([AgentID])
-REFERENCES [Agents].[Person] ([AgentID])
+ALTER TABLE [HumanResources].[EmployeeDepartmentHistory] CHECK CONSTRAINT [FK_EmployeeDepartmentHistory_Department_DepartmentID]
 GO
 
-ALTER TABLE [Agents].[Password] CHECK CONSTRAINT [FK_Password_Person_AgentID]
+ALTER TABLE [HumanResources].[EmployeeDepartmentHistory]  WITH CHECK ADD  CONSTRAINT [FK_EmployeeDepartmentHistory_Employee_BusinessEntityID] FOREIGN KEY([BusinessEntityID])
+REFERENCES [HumanResources].[Employee] ([BusinessEntityID])
 GO
 
--- Agents.PhoneNumberType
-CREATE TABLE [Agents].[PhoneNumberType](
-	[PhoneNumberTypeID] [int] IDENTITY(1,1) NOT NULL,
-	[Name] [dbo].[Name] NOT NULL,
-	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_PhoneNumberType_PhoneNumberTypeID] PRIMARY KEY CLUSTERED 
-(
-	[PhoneNumberTypeID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
+ALTER TABLE [HumanResources].[EmployeeDepartmentHistory] CHECK CONSTRAINT [FK_EmployeeDepartmentHistory_Employee_BusinessEntityID]
 GO
 
-ALTER TABLE [Agents].[PhoneNumberType] ADD  CONSTRAINT [DF_PhoneNumberType_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [HumanResources].[EmployeeDepartmentHistory]  WITH CHECK ADD  CONSTRAINT [FK_EmployeeDepartmentHistory_Shift_ShiftID] FOREIGN KEY([ShiftID])
+REFERENCES [HumanResources].[Shift] ([ShiftID])
 GO
 
--- Agents.PersonPhone
-
-CREATE TABLE [Agents].[PersonPhone](
-	[AgentID] [int] NOT NULL,
-	[PhoneNumber] [dbo].[Phone] NOT NULL,
-	[PhoneNumberTypeID] [int] NOT NULL,
-	[ModifiedDate] [datetime] NOT NULL,
- CONSTRAINT [PK_PersonPhone_AgentID_PhoneNumber_PhoneNumberTypeID] PRIMARY KEY CLUSTERED 
-(
-	[AgentID] ASC,
-	[PhoneNumber] ASC,
-	[PhoneNumberTypeID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
+ALTER TABLE [HumanResources].[EmployeeDepartmentHistory] CHECK CONSTRAINT [FK_EmployeeDepartmentHistory_Shift_ShiftID]
 GO
 
-ALTER TABLE [Agents].[PersonPhone] ADD  CONSTRAINT [DF_PersonPhone_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+ALTER TABLE [HumanResources].[EmployeeDepartmentHistory]  WITH CHECK ADD  CONSTRAINT [CK_EmployeeDepartmentHistory_EndDate] CHECK  (([EndDate]>=[StartDate] OR [EndDate] IS NULL))
 GO
 
-ALTER TABLE [Agents].[PersonPhone]  WITH CHECK ADD  CONSTRAINT [FK_PersonPhone_Person_AgentID] FOREIGN KEY([AgentID])
-REFERENCES [Agents].[Person] ([AgentID])
+ALTER TABLE [HumanResources].[EmployeeDepartmentHistory] CHECK CONSTRAINT [CK_EmployeeDepartmentHistory_EndDate]
 GO
-
-ALTER TABLE [Agents].[PersonPhone] CHECK CONSTRAINT [FK_PersonPhone_Person_AgentID]
-GO
-
-ALTER TABLE [Agents].[PersonPhone]  WITH CHECK ADD  CONSTRAINT [FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID] FOREIGN KEY([PhoneNumberTypeID])
-REFERENCES [Agents].[PhoneNumberType] ([PhoneNumberTypeID])
-GO
-
-ALTER TABLE [Agents].[PersonPhone] CHECK CONSTRAINT [FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID]
-GO
-
--- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
