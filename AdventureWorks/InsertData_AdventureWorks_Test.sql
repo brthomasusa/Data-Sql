@@ -1,7 +1,9 @@
-USE AdventureWorks_Test
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
 GO
 -- Used to load the database
-CREATE OR ALTER Proc dbo.usp_InitializeTestDb
+CREATE OR ALTER  Proc [dbo].[usp_InitializeTestDb]
 as
 BEGIN
     BEGIN TRAN
@@ -21,13 +23,31 @@ BEGIN
             -- These have no dependencies
             Delete from Person.BusinessEntity;
             Delete from HumanResources.Department;
-            Delete from HumanResources.Shift;           
+            Delete from HumanResources.Shift;            
 
             DBCC CHECKIDENT ("Person.Address", RESEED, 0);                    
             DBCC CHECKIDENT ("Person.EmailAddress", RESEED, 0);
             DBCC CHECKIDENT ("Person.BusinessEntity", RESEED, 0);
             DBCC CHECKIDENT ("HumanResources.Department", RESEED, 0);
             DBCC CHECKIDENT ("HumanResources.Shift", RESEED, 0);
+
+            -- HumanResources.Shift
+            SET IDENTITY_INSERT HumanResources.Shift ON;
+                INSERT INTO HumanResources.Shift
+                    ([ShiftID], [Name] ,[StartTime], [EndTime], [ModifiedDate])
+                SELECT 
+                    [ShiftID], [Name] ,[StartTime], [EndTime], [ModifiedDate]
+                FROM AdventureWorks2019.HumanResources.Shift;
+            SET IDENTITY_INSERT HumanResources.Shift OFF;
+
+            -- HumanResources.Department
+            SET IDENTITY_INSERT HumanResources.Department ON;
+                INSERT INTO HumanResources.Department
+                    ([DepartmentID], [Name] ,[GroupName], [ModifiedDate])
+                SELECT 
+                    [DepartmentID], [Name] ,[GroupName], [ModifiedDate]
+                FROM AdventureWorks2019.HumanResources.Department;
+            SET IDENTITY_INSERT HumanResources.Department OFF;
 
             -- Person.BusinessEntity
             SET IDENTITY_INSERT Person.BusinessEntity ON;
@@ -36,7 +56,12 @@ BEGIN
                 SELECT 
                     [BusinessEntityID], [rowguid], [ModifiedDate]
                 FROM AdventureWorks2019.Person.BusinessEntity be
-                WHERE be.BusinessEntityID IN (SELECT BusinessEntityID FROM AdventureWorks2019.HumanResources.Employee);
+                WHERE be.BusinessEntityID IN 
+                (
+                    SELECT BusinessEntityID 
+                    FROM AdventureWorks2019.HumanResources.Employee
+                    WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+                );
             SET IDENTITY_INSERT Person.BusinessEntity OFF;
 
             -- Person.Person
@@ -45,7 +70,12 @@ BEGIN
             SELECT 
                 [BusinessEntityID], [PersonType], [NameStyle], [Title], [FirstName], [MiddleName], [LastName], [Suffix], [EmailPromotion], [rowguid], [ModifiedDate]
             FROM AdventureWorks2019.Person.Person p
-            WHERE p.BusinessEntityID IN (SELECT BusinessEntityID FROM AdventureWorks2019.HumanResources.Employee);
+            WHERE p.BusinessEntityID IN 
+            (
+                SELECT BusinessEntityID 
+                FROM AdventureWorks2019.HumanResources.Employee
+                WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+            );
 
             -- Person.BusinessEntityContact
             INSERT INTO Person.BusinessEntityContact
@@ -53,7 +83,12 @@ BEGIN
             SELECT 
                 [BusinessEntityID], [PersonID], [ContactTypeID], [rowguid], [ModifiedDate]
             FROM AdventureWorks2019.Person.BusinessEntityContact p
-            WHERE p.BusinessEntityID IN (SELECT BusinessEntityID FROM AdventureWorks2019.HumanResources.Employee);
+            WHERE p.BusinessEntityID IN 
+            (
+                SELECT BusinessEntityID 
+                FROM AdventureWorks2019.HumanResources.Employee
+                WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+            );
 
             -- Person.EmailAddress
             SET IDENTITY_INSERT Person.EmailAddress ON;
@@ -62,7 +97,12 @@ BEGIN
                 SELECT 
                     [BusinessEntityID], [EmailAddressID], [EmailAddress], [rowguid], [ModifiedDate]
                 FROM AdventureWorks2019.Person.EmailAddress p
-                WHERE p.BusinessEntityID IN (SELECT BusinessEntityID FROM AdventureWorks2019.HumanResources.Employee);
+                WHERE p.BusinessEntityID IN 
+            (
+                SELECT BusinessEntityID 
+                FROM AdventureWorks2019.HumanResources.Employee
+                WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+            );
             SET IDENTITY_INSERT Person.EmailAddress OFF;
 
             -- Person.[Password]
@@ -71,7 +111,12 @@ BEGIN
             SELECT 
                 [BusinessEntityID], [PasswordHash], [PasswordSalt], [rowguid], [ModifiedDate]
             FROM AdventureWorks2019.Person.[Password] p
-            WHERE p.BusinessEntityID IN (SELECT BusinessEntityID FROM AdventureWorks2019.HumanResources.Employee);
+            WHERE p.BusinessEntityID IN 
+            (
+                SELECT BusinessEntityID 
+                FROM AdventureWorks2019.HumanResources.Employee
+                WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+            );
 
             -- Person.PersonPhone
             INSERT INTO Person.PersonPhone
@@ -79,7 +124,12 @@ BEGIN
             SELECT 
                 [BusinessEntityID], [PhoneNumber], [PhoneNumberTypeID], [ModifiedDate]
             FROM AdventureWorks2019.Person.PersonPhone p
-            WHERE p.BusinessEntityID IN (SELECT BusinessEntityID FROM AdventureWorks2019.HumanResources.Employee);
+            WHERE p.BusinessEntityID IN 
+            (
+                SELECT BusinessEntityID 
+                FROM AdventureWorks2019.HumanResources.Employee
+                WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+            );
 
             -- Person.Address
             SET IDENTITY_INSERT Person.Address ON;
@@ -92,7 +142,12 @@ BEGIN
                     (
                         SELECT AddressID 
                         FROM AdventureWorks2019.Person.BusinessEntityAddress 
-                        WHERE BusinessEntityID IN (SELECT BusinessEntityID FROM AdventureWorks2019.HumanResources.Employee)
+                        WHERE BusinessEntityID IN 
+                        (
+                            SELECT BusinessEntityID 
+                            FROM AdventureWorks2019.HumanResources.Employee
+                            WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+                        )
                     );
             SET IDENTITY_INSERT Person.Address OFF;
 
@@ -102,7 +157,12 @@ BEGIN
             SELECT 
                 [BusinessEntityID], [AddressID], [AddressTypeID], [rowguid], [ModifiedDate]
             FROM AdventureWorks2019.Person.[BusinessEntityAddress] p
-            WHERE p.BusinessEntityID IN (SELECT BusinessEntityID FROM AdventureWorks2019.HumanResources.Employee);
+            WHERE p.BusinessEntityID IN 
+            (
+                SELECT BusinessEntityID 
+                FROM AdventureWorks2019.HumanResources.Employee
+                WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+            );
 
             -- HumanResources.Employee
             INSERT INTO HumanResources.Employee
@@ -111,21 +171,39 @@ BEGIN
             SELECT 
                 [BusinessEntityID], [NationalIDNumber], [LoginID], [OrganizationNode], [JobTitle], [BirthDate], [MaritalStatus], 
                 [Gender], [HireDate], [SalariedFlag], [VacationHours], [SickLeaveHours], [CurrentFlag], [rowguid], [ModifiedDate]
-            FROM AdventureWorks2019.HumanResources.Employee;
+            FROM AdventureWorks2019.HumanResources.Employee
+            WHERE BusinessEntityID IN 
+            (
+                SELECT BusinessEntityID 
+                FROM AdventureWorks2019.HumanResources.Employee
+                WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+            ); 
 
             -- HumanResources.EmployeePayHistory
             INSERT INTO HumanResources.EmployeePayHistory
                 ([BusinessEntityID], [RateChangeDate], [Rate], [PayFrequency], [ModifiedDate])
             SELECT 
                 [BusinessEntityID], [RateChangeDate], [Rate], [PayFrequency], [ModifiedDate]                
-            FROM AdventureWorks2019.HumanResources.EmployeePayHistory;
+            FROM AdventureWorks2019.HumanResources.EmployeePayHistory
+            WHERE BusinessEntityID IN 
+            (
+                SELECT BusinessEntityID 
+                FROM AdventureWorks2019.HumanResources.Employee
+                WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+            );
 
             -- HumanResources.EmployeeDepartmentHistory
             INSERT INTO HumanResources.EmployeeDepartmentHistory
                 ([BusinessEntityID], [DepartmentID], [ShiftID], [StartDate], [EndDate], [ModifiedDate])
             SELECT 
                 [BusinessEntityID], [DepartmentID], [ShiftID], [StartDate], [EndDate], [ModifiedDate]                
-            FROM AdventureWorks2019.HumanResources.EmployeeDepartmentHistory;
+            FROM AdventureWorks2019.HumanResources.EmployeeDepartmentHistory
+            WHERE BusinessEntityID IN 
+            (
+                SELECT BusinessEntityID 
+                FROM AdventureWorks2019.HumanResources.Employee
+                WHERE OrganizationLevel < 2 OR OrganizationLevel IS NULL
+            );
     
             COMMIT TRANSACTION
         END TRY
@@ -142,3 +220,4 @@ BEGIN
                     ERROR_MESSAGE() AS ErrorMessage;                
         END CATCH    
 END
+GO
