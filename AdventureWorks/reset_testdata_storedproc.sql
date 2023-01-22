@@ -19,6 +19,7 @@ BEGIN
             Delete from Person.EmailAddress;
             Delete from Person.BusinessEntityContact;
             Delete from Person.Person;
+            Delete from Person.Company;
 
             -- These have no dependencies
             Delete from Person.BusinessEntity;
@@ -31,6 +32,13 @@ BEGIN
             DBCC CHECKIDENT ("HumanResources.Department", RESEED, 0);
             DBCC CHECKIDENT ("HumanResources.Shift", RESEED, 0);
 
+            -- Person.Company
+            INSERT INTO Person.Company
+            (CompanyID, CompanyName, LegalName, EIN, WebsiteUrl, MailAddressLine1, MailAddressLine2, MailCity, MailStateProvinceID, MailPostalCode, 
+            DeliveryAddressLine1, DeliveryAddressLine2, DeliveryCity, DeliveryStateProvinceID, DeliveryPostalCode, Telephone, Fax)
+            VALUES(1, 'Adventure-Works Cycles', 'Adventure-Works Cycles, Inc.', '98-123456', 'https://www.adventure-works.com', 
+                'PO Box 6350', NULL, 'Dallas', 73, '75214-6350', '6350 E. Mockingbird Ln', 'Suite 100', 'Dallas', 73, '75214', '214-828-0448', '214-828-1441');
+                
             -- HumanResources.Shift
             SET IDENTITY_INSERT HumanResources.Shift ON;
                 INSERT INTO HumanResources.Shift

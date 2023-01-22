@@ -234,6 +234,18 @@ CREATE TABLE [Person].[Company](
 	[LegalName] [dbo].[Name] NULL,
 	[EIN] [nchar](10) NOT NULL,
 	[WebsiteUrl] [nvarchar](50) NULL,
+	[MailAddressLine1] [nvarchar](60) NOT NULL,
+	[MailAddressLine2] [nvarchar](60) NULL,
+	[MailCity] [nvarchar](30) NOT NULL,
+	[MailStateProvinceID] [int] NOT NULL,
+	[MailPostalCode] [nvarchar](15) NOT NULL,
+	[DeliveryAddressLine1] [nvarchar](60) NOT NULL,
+	[DeliveryAddressLine2] [nvarchar](60) NULL,
+	[DeliveryCity] [nvarchar](30) NOT NULL,
+	[DeliveryStateProvinceID] [int] NOT NULL,
+	[DeliveryPostalCode] [nvarchar](15) NOT NULL,
+	[Telephone] [dbo].[Phone] NOT NULL,
+	[Fax] [dbo].[Phone] NOT NULL,		
 	[rowguid] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
 	[ModifiedDate] [datetime] NOT NULL,
  CONSTRAINT [PK_Company_BusinessEntityID] PRIMARY KEY CLUSTERED 
@@ -250,6 +262,12 @@ ALTER TABLE [Person].[Company] ADD  CONSTRAINT [DF_Company_rowguid]  DEFAULT (ne
 GO
 
 ALTER TABLE [Person].[Company] ADD  CONSTRAINT [DF_Company_ModifiedDate]  DEFAULT (getdate()) FOR [ModifiedDate]
+GO
+ALTER TABLE [Person].[Company]  WITH CHECK ADD  CONSTRAINT [FK_Company_MailStateProvince_StateProvinceID] FOREIGN KEY([MailStateProvinceID])
+REFERENCES [Person].[StateProvince] ([StateProvinceID])
+GO
+ALTER TABLE [Person].[Company]  WITH CHECK ADD  CONSTRAINT [FK_Company_DeliveryStateProvince_StateProvinceID] FOREIGN KEY([DeliveryStateProvinceID])
+REFERENCES [Person].[StateProvince] ([StateProvinceID])
 GO
 
 -- Person.Address
@@ -713,12 +731,6 @@ GO
 
 -- Insert test data
 
--- Person.Company
-INSERT INTO Person.Company
-(CompanyID, CompanyName, LegalName, EIN, WebsiteUrl)
-VALUES(1, 'Adventure-Works Cycles', 'Adventure-Works Cycles, Inc.', '98-123456', 'https://www.adventure-works.com')
-GO
-
 -- Person.AddressType
 SET IDENTITY_INSERT Person.AddressType ON;
     INSERT INTO Person.AddressType
@@ -778,6 +790,14 @@ SET IDENTITY_INSERT Person.StateProvince OFF;
 GO
 
 -- The following tables will be emptied and repopulated before each test run
+
+-- Person.Company
+INSERT INTO Person.Company
+(CompanyID, CompanyName, LegalName, EIN, WebsiteUrl, MailAddressLine1, MailAddressLine2, MailCity, MailStateProvinceID, MailPostalCode, 
+ DeliveryAddressLine1, DeliveryAddressLine2, DeliveryCity, DeliveryStateProvinceID, DeliveryPostalCode, Telephone, Fax)
+VALUES(1, 'Adventure-Works Cycles', 'Adventure-Works Cycles, Inc.', '98-123456', 'https://www.adventure-works.com', 
+	   'PO Box 6350', NULL, 'Dallas', 73, '75214-6350', '6350 E. Mockingbird Ln', 'Suite 100', 'Dallas', 73, '75214', '214-828-0448', '214-828-1441')
+GO
 
 -- HumanResources.Shift
 SET IDENTITY_INSERT HumanResources.Shift ON;
@@ -985,6 +1005,7 @@ BEGIN
             Delete from Person.EmailAddress;
             Delete from Person.BusinessEntityContact;
             Delete from Person.Person;
+            Delete from Person.Company;
 
             -- These have no dependencies
             Delete from Person.BusinessEntity;
@@ -996,6 +1017,13 @@ BEGIN
             DBCC CHECKIDENT ("Person.BusinessEntity", RESEED, 0);
             DBCC CHECKIDENT ("HumanResources.Department", RESEED, 0);
             DBCC CHECKIDENT ("HumanResources.Shift", RESEED, 0);
+
+            -- Person.Company
+            INSERT INTO Person.Company
+            (CompanyID, CompanyName, LegalName, EIN, WebsiteUrl, MailAddressLine1, MailAddressLine2, MailCity, MailStateProvinceID, MailPostalCode, 
+            DeliveryAddressLine1, DeliveryAddressLine2, DeliveryCity, DeliveryStateProvinceID, DeliveryPostalCode, Telephone, Fax)
+            VALUES(1, 'Adventure-Works Cycles', 'Adventure-Works Cycles, Inc.', '98-123456', 'https://www.adventure-works.com', 
+                'PO Box 6350', NULL, 'Dallas', 73, '75214-6350', '6350 E. Mockingbird Ln', 'Suite 100', 'Dallas', 73, '75214', '214-828-0448', '214-828-1441');
 
             -- HumanResources.Shift
             SET IDENTITY_INSERT HumanResources.Shift ON;
