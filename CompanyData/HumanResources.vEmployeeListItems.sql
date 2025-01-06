@@ -6,7 +6,9 @@ CREATE OR ALTER VIEW [HumanResources].[vEmployeeListItems]
 AS 
     SELECT 
         e.[BusinessEntityID]
-        ,CONCAT(p.LastName, ', ' ,p.FirstName, ' ',COALESCE(p.MiddleName,'')) AS EmployeeName
+        ,p.LastName
+        ,p.FirstName
+        ,p.MiddleName
         ,e.[JobTitle]
         ,d.[Name] AS Department
         ,s.[Name] AS Shift
