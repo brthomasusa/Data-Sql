@@ -1,4 +1,31 @@
 -- Store Proc HumanResources.spGetEmployeeDetails
+CREATE OR ALTER PROCEDURE [HumanResources].[spGetEmployeeListIemsByLastName] 
+	@searchCriteria NVARCHAR(30),
+	@skip int,
+	@take int
+AS 
+SET NOCOUNT ON
+BEGIN 
+    SELECT 
+		BusinessEntityID           
+		,LastName
+		,FirstName
+		,MiddleName
+		,JobTitle
+		,Department 
+		,JobTitle
+		,Department
+		,Shift
+		,ManagerName 
+		,EmploymentStatus                      
+	FROM HumanResources.vEmployeeListItems
+	WHERE LastName LIKE '%'+IsNull(@searchCriteria,LastName)+'%'  --CONCAT('%',@searchCriteria,'%')
+    ORDER BY LastName, FirstName, MiddleName     
+	OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY;
+END
+GO
+
+-- Store Proc HumanResources.spGetEmployeeDetails
 CREATE OR ALTER PROCEDURE [HumanResources].[spGetEmployeeDetails] @EmployeeID INT
 AS 
 SET NOCOUNT ON
