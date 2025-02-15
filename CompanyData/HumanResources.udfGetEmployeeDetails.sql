@@ -84,7 +84,7 @@ BEGIN
         ,EmployeesManaged
         ,ManagerName 	 
     FROM HumanResources.vEmployeeListItemsWithDeptShiftOrgInfo
-    WHERE DepartmentID = @departmentId AND LastName LIKE '%'+IsNull(@lastName, LastName)+'%'
+    WHERE DepartmentID = @departmentId AND LastName LIKE CONCAT(@lastName,'%')   --LIKE '%'+IsNull(@lastName, LastName)+'%'
     ORDER BY OrganizationLevel, LastName, FirstName, MiddleName   
 	OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY;
 END
@@ -240,8 +240,8 @@ CREATE OR ALTER VIEW [HumanResources].[vDepartmentHistoryViewModel]
 AS 
 SELECT
     BusinessEntityID
-    ,s.Name AS Department
-    ,d.Name AS Shift
+    ,d.Name AS Department
+    ,s.Name AS Shift
     ,StartDate
     ,EndDate             
 FROM HumanResources.EmployeeDepartmentHistory edh
